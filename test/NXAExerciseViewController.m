@@ -12,32 +12,22 @@
 #import "NXAOptionModel.h"
 #import "NXAExerciseCountCollectionViewCell.h"
 
-
 #define color(r,g,b,al) [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:al]
 #define itemW (XAWIDTH * 8 / 9 - 35) / 6
 #define itemH itemW * 4 / 3
-
+#define ScreenW [UIScreen mainScreen].bounds.size.width
 
 @interface NXAExerciseViewController ()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout,NXAExerciseCollectionViewCellDelegate,UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) UICollectionView *collectionView;
 @property (nonatomic, strong) UICollectionViewFlowLayout *flowLayout;
 @property (nonatomic, strong) NSMutableArray *dataSource;   //
-
-
 @property (nonatomic, assign) NSInteger score;    //记录答题分数
-
 @property (nonatomic, strong) UIView *toolView;   //底部View
-
 @property (nonatomic, strong) UICollectionView *countCollectionView;   //做题详情滚动视图
-
 @property (nonatomic, strong) UIView *centerView;   //做题详情弹出的视图
-
 @property (nonatomic, strong) UIView *BGView;  //做题详情半透明背景
-
 @property (nonatomic, assign) NSInteger selectedQNumber;  //选过的题号
-
-
 @end
 
 @implementation NXAExerciseViewController
@@ -86,7 +76,7 @@ static NSString *const countCellId = @"countCellId";
     
     UIButton *countBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     countBtn.frame = CGRectMake(XAWIDTH / 3, XAHIGHT - 50, XAWIDTH / 3, 50);
-    [countBtn setTitle:@"第几题" forState:UIControlStateNormal];
+    [countBtn setTitle:@"选题" forState:UIControlStateNormal];
     countBtn.backgroundColor = [UIColor clearColor];
     [countBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [countBtn addTarget:self action:@selector(countClick) forControlEvents:UIControlEventTouchUpInside];
@@ -109,11 +99,11 @@ static NSString *const countCellId = @"countCellId";
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
-//    return self.dataSource.count;
+    
     if (collectionView == self.collectionView) {
-        return self.dataSource.count * 5 ;
+        return self.dataSource.count;
     }else if (collectionView == self.countCollectionView){
-        return 4;
+        return self.dataSource.count;
     }else{
         return 0;
     }
@@ -123,31 +113,20 @@ static NSString *const countCellId = @"countCellId";
     if (collectionView == self.collectionView) {
         NXAExerciseCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:cellId forIndexPath:indexPath];
         
-        NXAExerciseModel *model = self.dataSource[indexPath.row % 4];
+        NXAExerciseModel *model = self.dataSource[indexPath.row];
         model.questionNumber = indexPath.row;
         cell.collectionView = collectionView;
         cell.model = model;
         cell.delegate = self;
-        
-//        self.indexPath = indexPath;
-        
         [cell.tableView reloadData];
         return cell;
-    }else if (collectionView == self.countCollectionView){
-        NXAExerciseCountCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:countCellId forIndexPath:indexPath];
         
-//        NXAExerciseModel *model = self.dataSource[indexPath.row];
-//        model.questionNumber = indexPath.row;
-//        cell.exerciseModel = model;
-//        cell.backgroundColor = [UIColor redColor];
-//
-//        if (indexPath.row == self.selectedQNumber) {
-//            cell.backgroundColor = [UIColor yellowColor];
-//        }
-       
-        return cell;
     }else{
-        return nil;
+        NXAExerciseCountCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:countCellId forIndexPath:indexPath];
+        NXAExerciseModel * model = self.dataSource[indexPath.row];
+        model.questionNumber = [self.dataSource indexOfObject:model] + 1;
+        cell.exerciseModel = model;
+        return cell;
     }
 }
 
@@ -164,55 +143,42 @@ static NSString *const countCellId = @"countCellId";
     
 }
 
-
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section{
-    if (collectionView == self.collectionView) {
-        return UIEdgeInsetsMake(0, 0, 0, 0);
-    }else if (collectionView == self.countCollectionView){
-        return UIEdgeInsetsMake(5, 5, 5, 5);
-    }else{
-        return UIEdgeInsetsMake(0, 0, 0, 0);
+    
+    if (collectionView == self.countCollectionView){
+        return UIEdgeInsetsMake(8,8,8,8);
     }
+    return UIEdgeInsetsMake(0, 0, 0, 0);
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section{
-    if (collectionView == self.collectionView) {
-        return 0;
-    }else if (collectionView == self.countCollectionView){
+  
+    if (collectionView == self.countCollectionView){
         return 5;
-    }else{
-        return 0;
     }
-    
+    return 0;
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section{
-    if (collectionView == self.collectionView) {
-        return 0;
-    }else if (collectionView == self.countCollectionView){
+   
+    if (collectionView == self.countCollectionView){
         return 5;
-    }else{
-        return 0;
     }
+    return 0;
+
 }
 
 
 #pragma mark - UICollectionViewDelegate
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-    if (collectionView == self.collectionView) {
-        
-    }else if (collectionView == self.countCollectionView){
+ 
+    if (collectionView == self.countCollectionView){
         //通过动画滚动到下一个位置
         [self.BGView removeFromSuperview];
         [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
-        
-    }else{
-        
     }
-    
 }
-
 
 - (NSMutableArray *)dataSource{
     
@@ -292,29 +258,23 @@ static NSString *const countCellId = @"countCellId";
         exerciseItem0.answer = @"A";
         exerciseItem0.options = @[item0,item1];
         exerciseItem0.title = @"第1题?";
-        exerciseItem0.isChoose = NO;
         
         NXAExerciseModel * exerciseItem1 = [[NXAExerciseModel alloc]init];
         exerciseItem1.answer = @"B";
         exerciseItem1.options = @[item2,item3,item4];
         exerciseItem1.title = @"第2题?";
-        exerciseItem1.isChoose = NO;
         
         NXAExerciseModel * exerciseItem2 = [[NXAExerciseModel alloc]init];
         exerciseItem2.answer = @"A";
         exerciseItem2.options = @[item5,item6,item7,item8];
         exerciseItem2.title = @"第3题?";
-        exerciseItem2.isChoose = NO;
         
         NXAExerciseModel * exerciseItem3 = [[NXAExerciseModel alloc]init];
         exerciseItem3.answer = @"C";
         exerciseItem3.options = @[item9,item10];
         exerciseItem3.title = @"第4题?";
-        exerciseItem3.isChoose = NO;
         
         _dataSource = [NSMutableArray arrayWithArray:@[exerciseItem0,exerciseItem1,exerciseItem2,exerciseItem3]];
-        
-        
     }
     return _dataSource;
 }
@@ -348,8 +308,8 @@ static NSString *const countCellId = @"countCellId";
 //下一页
 - (void)next{
   
-    CGFloat offsetX = self.collectionView.contentOffset.x + [UIScreen mainScreen].bounds.size.width;
-    if (offsetX > self.collectionView.contentSize.width - [UIScreen mainScreen].bounds.size.width ) {
+    CGFloat offsetX = self.collectionView.contentOffset.x + ScreenW;
+    if (offsetX > self.collectionView.contentSize.width - ScreenW) {
         [self showAlert:@"最后一题"];
     }else {
         
@@ -357,7 +317,6 @@ static NSString *const countCellId = @"countCellId";
             self.collectionView.contentOffset = CGPointMake(offsetX, 0);
         }];
     }
-    
 }
 
 //弹出提示框
@@ -365,7 +324,7 @@ static NSString *const countCellId = @"countCellId";
 {
     UIAlertView *promptAlert = (UIAlertView*)[theTimer userInfo];
     [promptAlert dismissWithClickedButtonIndex:0 animated:NO];
-    promptAlert =NULL;
+    promptAlert = NULL;
 }
 
 
@@ -397,6 +356,8 @@ static NSString *const countCellId = @"countCellId";
     self.centerView.backgroundColor = [UIColor whiteColor];
     [self.BGView addSubview:self.centerView];
     [self.view addSubview:self.BGView];
+    self.centerView.layer.cornerRadius = 4;
+    self.centerView.layer.masksToBounds = YES;
     
     //创建collectionView
     UICollectionViewFlowLayout *countFlowLayout = [[UICollectionViewFlowLayout alloc]init];

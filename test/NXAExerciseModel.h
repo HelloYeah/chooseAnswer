@@ -17,7 +17,6 @@
 @property (nonatomic, assign) BOOL isChoose;   // 选项是否选择过（选项点过一次就不能改变）
 @property (nonatomic, assign) NSInteger questionNumber;  //题号
 
-
 - (instancetype)initWithDict:(NSDictionary *)dict;
 
 @end

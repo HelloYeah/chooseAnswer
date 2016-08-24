@@ -10,9 +10,5 @@
 #import "NXAExerciseModel.h"
 
 @interface NXAExerciseCountCollectionViewCell : UICollectionViewCell
-
-@property (nonatomic, strong) UILabel *countLabel;
 @property (nonatomic, strong) NXAExerciseModel *exerciseModel;
-
-
 @end
