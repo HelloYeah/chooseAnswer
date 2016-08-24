@@ -29,10 +29,6 @@
 
 @property (nonatomic, strong) UIView *toolView;   //底部View
 
-//@property (nonatomic, strong) NSIndexPath *indexPath;
-
-@property (nonatomic, assign) NSInteger currentTitleIndex;
-
 @property (nonatomic, strong) UICollectionView *countCollectionView;   //做题详情滚动视图
 
 @property (nonatomic, strong) UIView *centerView;   //做题详情弹出的视图
@@ -55,7 +51,6 @@ static NSString *const countCellId = @"countCellId";
     self.view.backgroundColor = [UIColor whiteColor];
     
     self.score = 0;
-    self.currentTitleIndex = 0;
     //初始化视图
     [self initSubViews];
     
@@ -204,19 +199,19 @@ static NSString *const countCellId = @"countCellId";
 
 #pragma mark - UICollectionViewDelegate
 
-//- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-//    if (collectionView == self.collectionView) {
-//        
-//    }else if (collectionView == self.countCollectionView){
-//        //通过动画滚动到下一个位置
-//        [self.BGView removeFromSuperview];
-//        [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
-//        
-//    }else{
-//        
-//    }
-//    
-//}
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    if (collectionView == self.collectionView) {
+        
+    }else if (collectionView == self.countCollectionView){
+        //通过动画滚动到下一个位置
+        [self.BGView removeFromSuperview];
+        [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+        
+    }else{
+        
+    }
+    
+}
 
 
 - (NSMutableArray *)dataSource{
@@ -338,42 +333,36 @@ static NSString *const countCellId = @"countCellId";
 //上一页
 - (void)back{
    
-    NSLog(@"%ld",self.currentTitleIndex);
-    //2）计算出下一个需要展示的位置
-    NSInteger nextItem = self.currentTitleIndex - 1;
-    NSIndexPath *nextIndexPath = [NSIndexPath indexPathForItem:nextItem inSection:0];
-    if (nextItem <= 0) {
-        nextIndexPath = [NSIndexPath indexPathForItem:0 inSection:0];
-        //3）通过动画滚动到下一个位置
-        [self.collectionView scrollToItemAtIndexPath:nextIndexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
-        [self showAlert:@"已经是第一题了"];
-        return;
+    CGFloat offsetX = self.collectionView.contentOffset.x - [UIScreen mainScreen].bounds.size.width;
+    if (offsetX < 0) {
+        [self showAlert:@"第一题"];
+    }else if (offsetX == 0){
         
+        [UIView animateWithDuration:0.25 animations:^{
+            self.collectionView.contentOffset = CGPointZero;
+        }];
+    }else{
+        
+        [UIView animateWithDuration:0.25 animations:^{
+            self.collectionView.contentOffset = CGPointMake(offsetX, 0);
+        }];
     }
-     self.currentTitleIndex --;
-    //3）通过动画滚动到下一个位置
-    [self.collectionView scrollToItemAtIndexPath:nextIndexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
 }
 
 
 //下一页
 - (void)next{
   
-
-    NSLog(@"%ld",self.currentTitleIndex);
-    NSInteger nextItem = self.currentTitleIndex + 1;
-    NSIndexPath *nextIndexPath = [NSIndexPath indexPathForItem:nextItem inSection:0];
-    if (nextItem >= self.dataSource.count - 1) {
-        nextIndexPath = [NSIndexPath indexPathForItem:self.dataSource.count - 1 inSection:0];
-        //3）通过动画滚动到下一个位置
-        [self.collectionView scrollToItemAtIndexPath:nextIndexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
-        [self showAlert:@"已经是最后一题了"];
-        return;
+    CGFloat offsetX = self.collectionView.contentOffset.x + [UIScreen mainScreen].bounds.size.width;
+    if (offsetX > self.collectionView.contentSize.width - [UIScreen mainScreen].bounds.size.width ) {
+        [self showAlert:@"最后一题"];
+    }else {
         
+        [UIView animateWithDuration:0.25 animations:^{
+            self.collectionView.contentOffset = CGPointMake(offsetX, 0);
+        }];
     }
-    self.currentTitleIndex ++;
-    //3）通过动画滚动到下一个位置
-    [self.collectionView scrollToItemAtIndexPath:nextIndexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+    
 }
 
 //弹出提示框
