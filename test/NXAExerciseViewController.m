@@ -111,7 +111,7 @@ static NSString *const countCellId = @"countCellId";
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
 //    return self.dataSource.count;
     if (collectionView == self.collectionView) {
-        return self.dataSource.count;
+        return self.dataSource.count * 5 ;
     }else if (collectionView == self.countCollectionView){
         return 4;
     }else{
@@ -123,7 +123,7 @@ static NSString *const countCellId = @"countCellId";
     if (collectionView == self.collectionView) {
         NXAExerciseCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:cellId forIndexPath:indexPath];
         
-        NXAExerciseModel *model = self.dataSource[indexPath.row];
+        NXAExerciseModel *model = self.dataSource[indexPath.row % 4];
         model.questionNumber = indexPath.row;
         cell.collectionView = collectionView;
         cell.model = model;
@@ -336,11 +336,6 @@ static NSString *const countCellId = @"countCellId";
     CGFloat offsetX = self.collectionView.contentOffset.x - [UIScreen mainScreen].bounds.size.width;
     if (offsetX < 0) {
         [self showAlert:@"第一题"];
-    }else if (offsetX == 0){
-        
-        [UIView animateWithDuration:0.25 animations:^{
-            self.collectionView.contentOffset = CGPointZero;
-        }];
     }else{
         
         [UIView animateWithDuration:0.25 animations:^{
